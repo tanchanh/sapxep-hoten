@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sắp Xếp Họ Tên Trong Excel - Dương Tấn Chánh</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --mau-chinh: #1a5fb4;
+            --mau-chinh-dam: #154a8a;
+            --mau-thanh-cong: #2a7d2a;
+            --mau-canh-bao: #b86e00;
+            --mau-loi: #b83232;
+            --mau-nen: #f5f6f8;
+            --mau-the: #ffffff;
+            --mau-vien: #d0d5dd;
+            --mau-chu: #1a1a2e;
+            --mau-chu-phu: #5a6070;
+            --mau-nen-drag: #e8f0fe;
+            --mau-vien-drag: #1a5fb4;
+            --mau-tieu-de-bang: #e8f0fe;
+            --mau-nen-trong: #fdf0f0;
+            --mau-nen-canh-bao: #fff8e6;
+            --mau-nut-khoa-nen: #e5e7eb;
+            --mau-nut-khoa-chu: #9ca3af;
+            --mau-nut-khoa-vien: #d1d5db;
+            --ban-kinh: 8px;
+            --bong: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 1.1rem;
+            font-weight: normal;
+            color: var(--mau-chu);
+            background-color: var(--mau-nen);
+            padding: 0.5rem;
+            padding-bottom: 5rem;
+            width: 100%;
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            color: var(--mau-chinh);
+            word-break: normal;
+            overflow-wrap: break-word;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.8rem;
+            color: var(--mau-chu);
+            word-break: normal;
+            overflow-wrap: break-word;
+        }
+
+        .tac-gia {
+            font-size: 1.2rem;
+            font-style: normal;
+            font-weight: normal;
+            text-align: right;
+            color: var(--mau-chu-phu);
+            margin-bottom: 1rem;
+            word-break: normal;
+            overflow-wrap: break-word;
+        }
+
+        .khoi {
+            background-color: var(--mau-the);
+            border-radius: var(--ban-kinh);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--bong);
+            width: 100%;
+        }
+
+        .khoi.an {
+            display: none;
+        }
+
+        .khoi-tieu-de {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .khoi-tieu-de svg {
+            flex-shrink: 0;
+        }
+
+        .vung-tha {
+            border: 3px dashed var(--mau-vien);
+            border-radius: var(--ban-kinh);
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s;
+            background-color: var(--mau-nen);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 140px;
+            justify-content: center;
+        }
+
+        .vung-tha:hover,
+        .vung-tha.dang-tha {
+            border-color: var(--mau-vien-drag);
+            background-color: var(--mau-nen-drag);
+        }
+
+        .vung-tha p {
+            font-size: 1.1rem;
+            color: var(--mau-chu-phu);
+            word-break: normal;
+            overflow-wrap: break-word;
+        }
+
+        .vung-tha .dinh-dang {
+            font-size: 0.95rem;
+            color: var(--mau-chu-phu);
+            opacity: 0.8;
+        }
+
+        .input-an {
+            display: none;
+        }
+
+        .trang-thai-file {
+            margin-top: 0.8rem;
+            font-size: 1rem;
+            color: var(--mau-chu-phu);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            word-break: normal;
+            overflow-wrap: break-word;
+        }
+
+        .trang-thai-file.thanh-cong {
+            color: var(--mau-thanh-cong);
+            font-weight: bold;
+        }
+
+        .trang-thai-file.loi {
+            color: var(--mau-loi);
+            font-weight: bold;
+        }
+
+        .nhom-tuy-chon {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .dong-tuy-chon {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .dong-tuy-chon label {
+            font-size: 1.1rem;
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            word-break: normal;
+            overflow-wrap: break-word;
+        }
+
+        .dong-tuy-chon input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            cursor: pointer;
+            accent-color: var(--mau-chinh);
+        }
+
+        .dong-tuy-chon select {
+            font-size: 1.1rem;
+            font-family: inherit;
+            padding: 1rem;
+            border: 2px solid var(--mau-vien);
+            border-radius: var(--ban-kinh);
+            background-color: var(--mau-the);
+            color: var(--mau-chu);
+            cursor: pointer;
+            min-width: 200px;
+            max-width: 100%;
+        }
+
+        .dong-tuy-chon select:focus {
+            outline: 3px solid var(--mau-chinh);
+            outline-offset: 2px;
+        }
+
+        .input-so {
+            font-size: 1.1rem;
+            font-family: inherit;
+            padding: 1rem;
+            border: 2px solid var(--mau-vien);
+            border-radius: var(--ban-kinh);
+            background-color: var(--mau-the);
+            color: var(--mau-chu);
+            width: 140px;
+            max-width: 100%;
+        }
+
+        .input-so:focus {
+            outline: 3px solid var(--mau-chinh);
+            outline-offset: 2px;
+        }
+
+        .thong-bao-xac-nhan {
+            font-size: 1.1rem;
+            color: var(--mau-canh-bao);
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: var(--mau-nen-canh-bao);
+            border: 2px solid var(--mau-canh-bao);
+            border-radius: var(--ban-kinh);
+            word-break: normal;
+            overflow-wrap: break-word;
+        }
+
+        .nhom-nut {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .nut {
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 1rem;
+            border: 2px solid transparent;
+            border-radius: var(--ban-kinh);
+            cursor: pointer;
+            transition: background-color 0.2s, opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            word-break: normal;
+            overflow-wrap: break-word;
+        }
+
+        .nut:disabled {
+            background-color: var(--mau-nut-khoa-nen);
+            color: var(--mau-nut-khoa-chu);
+            border-color: var(--mau-nut-khoa-vien);
+            opacity: 0.8;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .nut-chinh {
+            background-color: var(--mau-chinh);
+            color: #ffffff;
+            border-color: var(--mau-chinh);
+        }
+
+        .nut-chinh:hover:not(:disabled) {
+            background-color: var(--mau-chinh-dam);
+        }
+
+        .nut-thanh-cong {
+            background-color: var(--mau-thanh-cong);
+            color: #ffffff;
+            border-color: var(--mau-thanh-cong);
+        }
+
+        .nut-thanh-cong:hover:not(:disabled) {
+            background-color: #1f5f1f;
+        }
+
+        .nut-huy {
+            background-color: var(--mau-the);
+            color: var(--mau-loi);
+            border-color: var(--mau-loi);
+        }
+
+        .nut-huy:hover:not(:disabled) {
+            background-color: var(--mau-nen-trong);
+        }
+
+        .khung-tien-trinh {
+            margin-top: 0.8rem;
+            display: none;
+        }
+
+        .khung-tien-trinh.hien-thi {
+            display: block;
+        }
+
+        .thanh-tien-trinh {
+            width: 100%;
+            height: 1.5rem;
+            background-color: var(--mau-vien);
+            border-radius: var(--ban-kinh);
+            overflow: hidden;
+        }
+
+        .thanh-tien-trinh-phan {
+            height: 100%;
+            background-color: var(--mau-chinh);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .chu-tien-trinh {
+            font-size: 1rem;
+            color: var(--mau-chu-phu);
+            margin-top: 0.5rem;
+            text-align: center;
+            word-break: normal;
+            overflow-wrap: break-word;
+        }
+
+        .thong-tin-ket-qua {
+            font-size: 1rem;
+            color: var(--mau-chu-phu);
+            margin-bottom: 1rem;
+            word-break: normal;
+            overflow-wrap: break-word;
+        }
+
+        .khung-bang {
+            width: 100%;
+            overflow-x: auto;
+            border: 2px solid var(--mau-vien);
+            border-radius: var(--ban-kinh);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+
+        thead {
+            background-color: var(--mau-chinh);
+            color: #ffffff;
+        }
+
+        th {
+            font-weight: bold;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 2px solid var(--mau-chinh-dam);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.8rem 1rem;
+            border-bottom: 2px solid var(--mau-vien);
+            word-break: normal;
+            overflow-wrap: break-word;
+        }
+
+        tbody tr:hover {
+            background-color: var(--mau-nen-drag);
+        }
+
+        .dong-tieu-de-bang {
+            background-color: var(--mau-tieu-de-bang);
+            font-weight: bold;
+        }
+
+        .dong-trong-ten {
+            background-color: var(--mau-nen-trong);
+        }
+
+        .dong-trong-ten td {
+            color: var(--mau-loi);
+        }
+
+        .dong-thong-bao-khac {
+            text-align: center;
+            color: var(--mau-chu-phu);
+        }
+
+        .trang-thai-rong {
+            padding: 1rem;
+            text-align: center;
+            color: var(--mau-chu-phu);
+            font-size: 1.1rem;
+            word-break: normal;
+            overflow-wrap: break-word;
+        }
+
+        .nhat-ky {
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 1rem;
+        }
+
+        .dong-nhat-ky {
+            padding: 0.5rem 1rem;
+            border-bottom: 2px solid var(--mau-vien);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            word-break: normal;
+            overflow-wrap: break-word;
+        }
+
+        .dong-nhat-ky:last-child {
+            border-bottom: none;
+        }
+
+        .dong-nhat-ky.canh-bao {
+            background-color: var(--mau-nen-canh-bao);
+        }
+
+        .dong-nhat-ky.loi {
+            background-color: var(--mau-nen-trong);
+        }
+
+        .dong-nhat-ky .nhan {
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .dong-nhat-ky.canh-bao .nhan {
+            color: var(--mau-canh-bao);
+        }
+
+        .dong-nhat-ky.loi .nhan {
+            color: var(--mau-loi);
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.3rem;
+            }
+
+            .nut {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nhom-nut {
+                flex-direction: column;
+            }
+
+            .dong-tuy-chon {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .dong-tuy-chon select,
+            .input-so {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Sắp Xếp Họ Tên Trong Excel</h1>
+    <p class="tac-gia">Dương Tấn Chánh</p>
+
+    <section class="khoi">
+        <div class="khoi-tieu-de">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a5fb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <h2>1. Chọn nguồn dữ liệu</h2>
+        </div>
+
+        <div class="vung-tha" id="vungTha">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#5a6070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="12" y1="18" x2="12" y2="12"></line>
+                <line x1="9" y1="15" x2="12" y2="12"></line>
+                <line x1="15" y1="15" x2="12" y2="12"></line>
+            </svg>
+            <p>Kéo & thả file Excel vào đây</p>
+            <p>hoặc bấm để chọn file · hoặc Ctrl + V để dán</p>
+            <p class="dinh-dang">Hỗ trợ: .xlsx · .xls · .csv</p>
+        </div>
+
+        <input type="file" id="inputFile" accept=".xlsx,.xls,.csv" class="input-an">
+
+        <div class="trang-thai-file" id="trangThaiFile">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a6070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>Chưa có tập tin nào được chọn</span>
+        </div>
+    </section>
+
+    <section class="khoi">
+        <div class="khoi-tieu-de">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a5fb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <h2>2. Tùy chọn xử lý</h2>
+        </div>
+
+        <div class="nhom-tuy-chon">
+            <div class="dong-tuy-chon">
+                <label for="chonSheet">Sheet:</label>
+                <select id="chonSheet">
+                    <option value="">-- Chưa có dữ liệu --</option>
+                </select>
+            </div>
+            <div class="dong-tuy-chon">
+                <label>
+                    <input type="checkbox" id="tuyChonCapitalize">
+                    Chuẩn hóa về dạng Chữ Hoa Đầu Mỗi Từ
+                </label>
+            </div>
+            <div class="dong-tuy-chon">
+                <label>
+                    <input type="checkbox" id="tuyChonDanhLaiSTT">
+                    Đánh lại cột STT từ 1 đến hết
+                </label>
+            </div>
+        </div>
+    </section>
+
+    <section class="khoi an" id="khoiXacNhan">
+        <div class="khoi-tieu-de">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#b86e00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <h2>Xác nhận cột họ và tên</h2>
+        </div>
+
+        <div class="thong-bao-xac-nhan" id="thongBaoXacNhan">
+            Không tìm thấy ô "Họ và Tên" trong file. Vui lòng chọn cột và dòng bắt đầu dữ liệu.
+        </div>
+
+        <div class="nhom-tuy-chon">
+            <div class="dong-tuy-chon">
+                <label for="chonCotXacNhan">Cột họ và tên:</label>
+                <select id="chonCotXacNhan"></select>
+            </div>
+            <div class="dong-tuy-chon">
+                <label for="chonDongXacNhan">Dòng bắt đầu dữ liệu (theo Excel, bắt đầu từ 1):</label>
+                <input type="number" id="chonDongXacNhan" class="input-so" min="1" value="2">
+            </div>
+        </div>
+
+        <div class="nhom-nut" style="margin-top: 1rem;">
+            <button class="nut nut-chinh" id="nutXacNhan">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Xác nhận & Bật sắp xếp
+            </button>
+        </div>
+    </section>
+
+    <section class="khoi">
+        <div class="khoi-tieu-de">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a5fb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <h2>3. Tiến hành</h2>
+        </div>
+
+        <div class="nhom-nut">
+            <button class="nut nut-chinh" id="nutSapXep" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="19" x2="12" y2="5"></line>
+                    <polyline points="5 12 12 5 19 12"></polyline>
+                </svg>
+                Sắp xếp dữ liệu
+            </button>
+            <button class="nut nut-thanh-cong" id="nutXuatFile" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Xuất file Excel
+            </button>
+            <button class="nut nut-huy" id="nutHuy" disabled>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+                Hủy
+            </button>
+        </div>
+
+        <div class="khung-tien-trinh" id="khungTienTrinh">
+            <div class="thanh-tien-trinh">
+                <div class="thanh-tien-trinh-phan" id="thanhTienTrinhPhan"></div>
+            </div>
+            <p class="chu-tien-trinh" id="chuTienTrinh">Đang xử lý...</p>
+        </div>
+    </section>
+
+    <section class="khoi">
+        <div class="khoi-tieu-de">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a5fb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <h2>4. Kết quả</h2>
+        </div>
+
+        <div class="thong-tin-ket-qua" id="thongTinKetQua">Chưa có dữ liệu — hãy chọn một file Excel để bắt đầu.</div>
+
+        <div class="khung-bang" id="khungBang">
+            <div class="trang-thai-rong">Chưa có dữ liệu</div>
+        </div>
+    </section>
+
+    <section class="khoi">
+        <div class="khoi-tieu-de">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a5fb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <h2>5. Nhật ký / Cảnh báo</h2>
+        </div>
+
+        <div class="nhat-ky" id="nhatKy">
+            <div class="dong-nhat-ky">
+                <span class="nhan">ℹ</span>
+                <span>Chưa có hoạt động nào.</span>
+            </div>
+        </div>
+    </section>
+
+    <script>
+    (function () {
+        'use strict';
+
+        var XLSX = null;
+        var workbookGoc = null;
+        var sheetDaSapXep = null;
+        var duLieuGoc = null;
+        var duLieuDaSapXep = null;
+        var tieuDeCot = [];
+        var dongTieuDe = -1;
+        var dongBatDauDuLieu = -1;
+        var viTriCotHoTen = -1;
+        var tenFileGoc = '';
+        var tenSheetHienTai = '';
+        var danhSachSheet = [];
+        var dangXuLy = false;
+        var demDrag = 0;
+
+        var SO_DONG_TRONG_TOI_DA = 3;
+
+        var vungTha = document.getElementById('vungTha');
+        var inputFile = document.getElementById('inputFile');
+        var trangThaiFile = document.getElementById('trangThaiFile');
+        var chonSheet = document.getElementById('chonSheet');
+        var tuyChonCapitalize = document.getElementById('tuyChonCapitalize');
+        var tuyChonDanhLaiSTT = document.getElementById('tuyChonDanhLaiSTT');
+        var khoiXacNhan = document.getElementById('khoiXacNhan');
+        var thongBaoXacNhan = document.getElementById('thongBaoXacNhan');
+        var chonCotXacNhan = document.getElementById('chonCotXacNhan');
+        var chonDongXacNhan = document.getElementById('chonDongXacNhan');
+        var nutXacNhan = document.getElementById('nutXacNhan');
+        var nutSapXep = document.getElementById('nutSapXep');
+        var nutXuatFile = document.getElementById('nutXuatFile');
+        var nutHuy = document.getElementById('nutHuy');
+        var khungTienTrinh = document.getElementById('khungTienTrinh');
+        var thanhTienTrinhPhan = document.getElementById('thanhTienTrinhPhan');
+        var chuTienTrinh = document.getElementById('chuTienTrinh');
+        var thongTinKetQua = document.getElementById('thongTinKetQua');
+        var khungBang = document.getElementById('khungBang');
+        var nhatKy = document.getElementById('nhatKy');
+
+        function ghiNhatKy(loai, noiDung) {
+            var dong = document.createElement('div');
+            dong.className = 'dong-nhat-ky' + (loai === 'canh-bao' ? ' canh-bao' : loai === 'loi' ? ' loi' : '');
+            var nhan = document.createElement('span');
+            nhan.className = 'nhan';
+            nhan.textContent = loai === 'canh-bao' ? '⚠' : loai === 'loi' ? '✕' : 'ℹ';
+            var chu = document.createElement('span');
+            chu.textContent = noiDung;
+            dong.appendChild(nhan);
+            dong.appendChild(chu);
+            nhatKy.appendChild(dong);
+            nhatKy.scrollTop = nhatKy.scrollHeight;
+        }
+
+        function xoaNhatKy() {
+            nhatKy.innerHTML = '';
+        }
+
+        function hienThiTienTrinh(phanTram, chu) {
+            khungTienTrinh.classList.add('hien-thi');
+            thanhTienTrinhPhan.style.width = phanTram + '%';
+            chuTienTrinh.textContent = chu;
+        }
+
+        function anTienTrinh() {
+            khungTienTrinh.classList.remove('hien-thi');
+        }
+
+        function datTrangThaiNut(trangThai) {
+            nutSapXep.disabled = !trangThai.sapXep;
+            nutXuatFile.disabled = !trangThai.xuatFile;
+            nutHuy.disabled = !trangThai.huy;
+        }
+
+        function chuanHoaVanBan(str) {
+            if (str === null || str === undefined) return '';
+            var s = String(str);
+            s = s.normalize('NFC');
+            s = s.replace(/[\u200B-\u200D\uFEFF\u200E\u200F]/g, '');
+            s = s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '');
+            s = s.replace(/\u00A0/g, ' ');
+            s = s.trim();
+            s = s.replace(/\s+/g, ' ');
+            return s;
+        }
+
+        function chuanHoaSoSanh(str) {
+            var s = chuanHoaVanBan(str).toLowerCase();
+            s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            s = s.replace(/đ/g, 'd');
+            return s;
+        }
+
+        function chuanHoaCapitalize(str) {
+            var s = chuanHoaVanBan(str);
+            if (!s) return s;
+            return s.split(' ').map(function (tu) {
+                if (!tu) return tu;
+                return tu.charAt(0).toUpperCase() + tu.slice(1).toLowerCase();
+            }).join(' ');
+        }
+
+        function tachTenChinh(hoTen) {
+            var s = chuanHoaVanBan(hoTen);
+            if (!s) return '';
+            var mang = s.split(' ');
+            return mang[mang.length - 1];
+        }
+
+        function taoSortKey(hoTen) {
+            var s = chuanHoaVanBan(hoTen);
+            if (!s) return '~~~~';
+            var tenChinh = tachTenChinh(s);
+            return (tenChinh + ' ' + s).toLowerCase();
+        }
+
+        function dinhDangSo(n) {
+            return Number(n).toLocaleString('vi-VN');
+        }
+
+        function tenCotChu(chiSo) {
+            var ten = '';
+            var n = chiSo;
+            while (n >= 0) {
+                ten = String.fromCharCode(65 + (n % 26)) + ten;
+                n = Math.floor(n / 26) - 1;
+            }
+            return ten;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function copyO(o) {
+            if (!o) return null;
+            var oMoi = {};
+            for (var k in o) {
+                if (k === 'v' && o.v instanceof Date) {
+                    oMoi.v = new Date(o.v.getTime());
+                } else {
+                    oMoi[k] = o[k];
+                }
+            }
+            return oMoi;
+        }
+
+        function cloneSheet(ws) {
+            var wsMoi = {};
+            for (var key in ws) {
+                if (key === '!merges') {
+                    wsMoi[key] = JSON.parse(JSON.stringify(ws[key]));
+                } else if (key === '!cols' || key === '!rows') {
+                    wsMoi[key] = ws[key].slice();
+                } else if (key[0] === '!') {
+                    wsMoi[key] = ws[key];
+                } else {
+                    wsMoi[key] = copyO(ws[key]);
+                }
+            }
+            return wsMoi;
+        }
+
+        function laHoTenTiengViet(s) {
+            if (!s) return false;
+            if (s.length < 3 || s.length > 60) return false;
+            if (/[0-9]/.test(s)) return false;
+
+            var khongDau = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+            if (!/^[A-Za-z\s]+$/.test(khongDau)) return false;
+
+            var mangTu = s.split(/\s+/);
+            if (mangTu.length < 2 || mangTu.length > 6) return false;
+
+            var soTuDai = 0;
+            for (var i = 0; i < mangTu.length; i++) {
+                if (mangTu[i].length >= 2) soTuDai++;
+            }
+            if (mangTu.length === 2) return soTuDai >= 1;
+            return soTuDai >= mangTu.length - 1;
+        }
+
+        function laOTieuDeHoTen(giaTri) {
+            var s = chuanHoaVanBan(giaTri);
+            if (!s) return false;
+            if (s.length > 30) return false;
+
+            var chuan = chuanHoaSoSanh(s);
+
+            if (!/\bho\s*(va\s*)?ten\b/.test(chuan)) return false;
+            if (/\b(cha|me|bo|nguoi do dau|nguoi giam ho)\b/.test(chuan)) return false;
+
+            return true;
+        }
+
+        function timOTieuDeHoTen(duLieu) {
+            var soDongQuet = Math.min(duLieu.length, 50);
+            for (var r = 0; r < soDongQuet; r++) {
+                var dong = duLieu[r];
+                if (!dong) continue;
+                for (var c = 0; c < dong.length; c++) {
+                    if (laOTieuDeHoTen(dong[c])) {
+                        return { dong: r, cot: c };
+                    }
+                }
+            }
+            return null;
+        }
+
+        function quetVungDuLieu(duLieu, dongBatDau) {
+            var ketQua = {
+                dongKetThuc: -1,
+                soDongTrongBoQua: 0,
+                soDongSttBatThuong: 0,
+                lyDoDung: ''
+            };
+
+            var demTrong = 0;
+            var viTriTrongDauTien = -1;
+
+            for (var r = dongBatDau; r < duLieu.length; r++) {
+                var dong = duLieu[r] || [];
+
+                var trongHoanToan = true;
+                for (var c = 0; c < dong.length; c++) {
+                    if (chuanHoaVanBan(dong[c]) !== '') {
+                        trongHoanToan = false;
+                        break;
+                    }
+                }
+
+                if (trongHoanToan) {
+                    if (demTrong === 0) viTriTrongDauTien = r;
+                    demTrong++;
+                    if (demTrong > SO_DONG_TRONG_TOI_DA) {
+                        ketQua.dongKetThuc = viTriTrongDauTien - 1;
+                        ketQua.lyDoDung = 'Quá ' + SO_DONG_TRONG_TOI_DA + ' dòng trống liên tiếp bắt đầu từ dòng ' + (viTriTrongDauTien + 1);
+                        return ketQua;
+                    }
+                    ketQua.soDongTrongBoQua++;
+                    continue;
+                }
+
+                demTrong = 0;
+                viTriTrongDauTien = -1;
+
+                var sttGoc = dong[0];
+                var sttSach = chuanHoaVanBan(sttGoc);
+                var sttChuoi = sttGoc === null || sttGoc === undefined ? '' : String(sttGoc);
+
+                var coKyTuAn = /[\u200B-\u200D\uFEFF]/.test(sttChuoi);
+                var coKhoangTrangThua = sttChuoi !== sttSach && sttSach !== '';
+                var laSoNhungKieuText = sttSach !== '' && /^\d+$/.test(sttSach) && typeof sttGoc === 'string';
+
+                if (coKyTuAn || coKhoangTrangThua || laSoNhungKieuText) {
+                    ketQua.soDongSttBatThuong++;
+                }
+
+                if (/^\d+$/.test(sttSach)) {
+                    ketQua.dongKetThuc = r;
+                } else {
+                    ketQua.lyDoDung = 'Dòng ' + (r + 1) + ' có dữ liệu nhưng số thứ tự không hợp lệ (giá trị ô A: "' + sttSach + '")';
+                    return ketQua;
+                }
+            }
+
+            ketQua.lyDoDung = 'Đã quét hết dữ liệu';
+            return ketQua;
+        }
+
+        function laCotCongThuc(ws, dongMau, cotIndex) {
+            var addr = XLSX.utils.encode_cell({ c: cotIndex, r: dongMau });
+            var o = ws[addr];
+            return !!(o && o.f !== undefined && o.f !== null && o.f !== '');
+        }
+
+        function dichCongThuc(congThuc, deltaDong) {
+            if (!deltaDong) return congThuc;
+            var re = /([=(,+\-*\/^&<>!\s:\[\]]|^)(\$?)([A-Z]{1,3})(\$?)(\d+)(?![0-9A-Za-z_(])/g;
+            return congThuc.replace(re, function (match, prefix, dollarCot, chuCot, dollarDong, soDong) {
+                if (dollarDong === '$') return match;
+                var soMoi = parseInt(soDong, 10) + deltaDong;
+                if (soMoi < 1) soMoi = 1;
+                return prefix + dollarCot + chuCot + dollarDong + soMoi;
+            });
+        }
+
+        var danhSachCDN = [
+            'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js',
+            'https://unpkg.com/xlsx@0.20.3/dist/xlsx.full.min.js',
+            'https://cdn.jsdelivr.net/npm/xlsx@0.20.3/dist/xlsx.full.min.js'
+        ];
+
+        function ganThuVien() {
+            if (typeof window.XLSX !== 'undefined' && window.XLSX) {
+                XLSX = window.XLSX;
+                return true;
+            }
+            return false;
+        }
+
+        function napThuVien() {
+            return new Promise(function (resolve, reject) {
+                var scriptNoiBo = document.createElement('script');
+                scriptNoiBo.src = 'js/xlsx.full.min.js';
+                scriptNoiBo.onload = function () {
+                    if (ganThuVien()) {
+                        resolve('js/xlsx.full.min.js');
+                        return;
+                    }
+                    thuCDN(0, resolve, reject);
+                };
+                scriptNoiBo.onerror = function () {
+                    thuCDN(0, resolve, reject);
+                };
+                document.head.appendChild(scriptNoiBo);
+            });
+        }
+
+        function thuCDN(chiSo, resolve, reject) {
+            if (chiSo >= danhSachCDN.length) {
+                reject(new Error('Không thể nạp thư viện SheetJS từ bất kỳ nguồn nào.'));
+                return;
+            }
+            var script = document.createElement('script');
+            script.src = danhSachCDN[chiSo];
+            script.onload = function () {
+                if (ganThuVien()) {
+                    resolve(danhSachCDN[chiSo]);
+                } else {
+                    thuCDN(chiSo + 1, resolve, reject);
+                }
+            };
+            script.onerror = function () {
+                thuCDN(chiSo + 1, resolve, reject);
+            };
+            document.head.appendChild(script);
+        }
+
+        function kiemTraDinhDang(file) {
+            var ten = file.name.toLowerCase();
+            var duoiHopLe = ['.xlsx', '.xls', '.csv'];
+            for (var i = 0; i < duoiHopLe.length; i++) {
+                if (ten.endsWith(duoiHopLe[i])) return true;
+            }
+            return false;
+        }
+
+        function docFile(file) {
+            return new Promise(function (resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    resolve(e.target.result);
+                };
+                reader.onerror = function () {
+                    reject(new Error('Không thể đọc file.'));
+                };
+                reader.onabort = function () {
+                    reject(new Error('Đã hủy đọc file.'));
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function xuLyFile(file) {
+            if (dangXuLy) return;
+            if (!file) return;
+
+            if (!XLSX) {
+                ghiNhatKy('loi', 'Thư viện SheetJS chưa sẵn sàng. Vui lòng đợi trong giây lát rồi thử lại.');
+                trangThaiFile.className = 'trang-thai-file loi';
+                trangThaiFile.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b83232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><span>Thư viện SheetJS chưa sẵn sàng.</span>';
+                return;
+            }
+
+            if (!kiemTraDinhDang(file)) {
+                trangThaiFile.className = 'trang-thai-file loi';
+                trangThaiFile.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b83232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><span>Định dạng không hỗ trợ. Chỉ nhận .xlsx, .xls, .csv</span>';
+                ghiNhatKy('loi', 'File "' + file.name + '" có định dạng không hỗ trợ.');
+                return;
+            }
+
+            tenFileGoc = file.name;
+            trangThaiFile.className = 'trang-thai-file';
+            trangThaiFile.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5a6070" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg><span>Đang đọc file: ' + file.name + ' (' + dinhDangSo((file.size / 1024).toFixed(1)) + ' KB)</span>';
+
+            xoaNhatKy();
+            ghiNhatKy('thong-tin', 'Bắt đầu đọc file: ' + file.name);
+
+            docFile(file).then(function (arrayBuffer) {
+                try {
+                    workbookGoc = XLSX.read(arrayBuffer, { type: 'array' });
+                    sheetDaSapXep = null;
+                    danhSachSheet = workbookGoc.SheetNames;
+                    tenSheetHienTai = danhSachSheet[0] || '';
+
+                    chonSheet.innerHTML = '';
+                    for (var i = 0; i < danhSachSheet.length; i++) {
+                        var opt = document.createElement('option');
+                        opt.value = danhSachSheet[i];
+                        opt.textContent = danhSachSheet[i];
+                        if (danhSachSheet[i] === tenSheetHienTai) opt.selected = true;
+                        chonSheet.appendChild(opt);
+                    }
+
+                    docSheet(tenSheetHienTai);
+
+                    trangThaiFile.className = 'trang-thai-file thanh-cong';
+                    trangThaiFile.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2a7d2a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span>Đã đọc: ' + file.name + ' · Sheet: ' + tenSheetHienTai + '</span>';
+
+                    ghiNhatKy('thong-tin', 'Đã đọc thành công. Sheet: ' + tenSheetHienTai + ', ' + dinhDangSo(duLieuGoc ? duLieuGoc.length : 0) + ' dòng.');
+                } catch (err) {
+                    trangThaiFile.className = 'trang-thai-file loi';
+                    trangThaiFile.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b83232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><span>Lỗi đọc file: ' + err.message + '</span>';
+                    ghiNhatKy('loi', 'Lỗi đọc file: ' + err.message);
+                }
+            }).catch(function (err) {
+                trangThaiFile.className = 'trang-thai-file loi';
+                trangThaiFile.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b83232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><span>' + err.message + '</span>';
+                ghiNhatKy('loi', err.message);
+            });
+        }
+
+        function datLaiGiaoDienRong(tenSheet) {
+            duLieuGoc = null;
+            duLieuDaSapXep = null;
+            sheetDaSapXep = null;
+            tieuDeCot = [];
+            dongTieuDe = -1;
+            dongBatDauDuLieu = -1;
+            viTriCotHoTen = -1;
+
+            chonCotXacNhan.innerHTML = '';
+            chonDongXacNhan.value = 1;
+            khoiXacNhan.classList.add('an');
+
+            khungBang.innerHTML = '<div class="trang-thai-rong">Chưa có dữ liệu</div>';
+            thongTinKetQua.textContent = 'Sheet "' + tenSheet + '" không có dữ liệu. Hãy chọn sheet khác.';
+
+            datTrangThaiNut({ sapXep: false, xuatFile: false, huy: false });
+        }
+
+        function docSheet(tenSheet) {
+            if (!workbookGoc || !tenSheet) return;
+
+            tenSheetHienTai = tenSheet;
+            var sheet = workbookGoc.Sheets[tenSheet];
+            if (!sheet) {
+                ghiNhatKy('loi', 'Không tìm thấy sheet: ' + tenSheet);
+                datLaiGiaoDienRong(tenSheet);
+                return;
+            }
+
+            duLieuGoc = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+            duLieuDaSapXep = null;
+            sheetDaSapXep = null;
+
+            if (!duLieuGoc || duLieuGoc.length === 0) {
+                ghiNhatKy('canh-bao', 'Sheet "' + tenSheet + '" không có dữ liệu.');
+                datLaiGiaoDienRong(tenSheet);
+                return;
+            }
+
+            var oTieuDe = timOTieuDeHoTen(duLieuGoc);
+
+            if (oTieuDe) {
+                dongTieuDe = oTieuDe.dong;
+                viTriCotHoTen = oTieuDe.cot;
+
+                dongBatDauDuLieu = dongTieuDe + 1;
+                while (dongBatDauDuLieu < duLieuGoc.length) {
+                    var dongThu = duLieuGoc[dongBatDauDuLieu];
+                    if (dongThu) {
+                        var giaTriHoTen = chuanHoaVanBan(dongThu[viTriCotHoTen]);
+                        if (laHoTenTiengViet(giaTriHoTen)) break;
+                    }
+                    dongBatDauDuLieu++;
+                }
+
+                tieuDeCot = (duLieuGoc[dongTieuDe] || []).map(function (o) {
+                    return chuanHoaVanBan(o);
+                });
+
+                khoiXacNhan.classList.add('an');
+
+                ghiNhatKy('thong-tin', 'Đã tìm thấy ô "Họ tên" tại ô ' + tenCotChu(viTriCotHoTen) + (dongTieuDe + 1) + ' (dòng ' + (dongTieuDe + 1) + ', cột ' + tenCotChu(viTriCotHoTen) + ').');
+                ghiNhatKy('thong-tin', 'Đã xác định dòng bắt đầu dữ liệu: dòng ' + (dongBatDauDuLieu + 1) + ' (ô ' + tenCotChu(viTriCotHoTen) + (dongBatDauDuLieu + 1) + ' = "' + chuanHoaVanBan(duLieuGoc[dongBatDauDuLieu][viTriCotHoTen]) + '").');
+
+                datTrangThaiNut({ sapXep: true, xuatFile: false, huy: false });
+            } else {
+                ghiNhatKy('canh-bao', 'Không tìm thấy ô "Họ tên" trong file.');
+
+                var ketQuaDo = doCotTheoDuLieu(duLieuGoc);
+
+                if (ketQuaDo) {
+                    hienThiKhoiXacNhan(ketQuaDo);
+                    ghiNhatKy('canh-bao', 'Gợi ý: cột ' + tenCotChu(ketQuaDo.cot) + ' (' + dinhDangSo(ketQuaDo.soKhop) + '/' + dinhDangSo(ketQuaDo.tongODuLieu) + ' ô khớp mẫu họ tên, ' + Math.round(ketQuaDo.tiLe * 100) + '%) · dòng bắt đầu ' + dinhDangSo(ketQuaDo.dongBatDau + 1) + '.');
+                    ghiNhatKy('canh-bao', 'Vui lòng xác nhận cột và dòng bắt đầu ở khối "Xác nhận cột họ và tên" phía trên.');
+                } else {
+                    hienThiKhoiXacNhan(null);
+                    ghiNhatKy('canh-bao', 'Không có cột nào khớp mẫu họ tên. Vui lòng chọn cột và dòng bắt đầu thủ công.');
+                }
+
+                datTrangThaiNut({ sapXep: false, xuatFile: false, huy: false });
+            }
+
+            hienThiBang(duLieuGoc, false);
+            thongTinKetQua.textContent = dinhDangSo(duLieuGoc.length) + ' dòng · ' + dinhDangSo(tieuDeCot.length) + ' cột · Sheet: ' + tenSheet;
+        }
+
+        function doCotTheoDuLieu(duLieu) {
+            var soDongQuet = Math.min(duLieu.length, 100);
+
+            var soCot = 0;
+            for (var r = 0; r < soDongQuet; r++) {
+                if (duLieu[r]) soCot = Math.max(soCot, duLieu[r].length);
+            }
+
+            var totNhat = null;
+
+            for (var c = 0; c < soCot; c++) {
+                var soKhop = 0;
+                var soODuLieu = 0;
+                var dongDauTien = -1;
+
+                for (var r2 = 0; r2 < soDongQuet; r2++) {
+                    var dong = duLieu[r2];
+                    if (!dong) continue;
+                    var sach = chuanHoaVanBan(dong[c]);
+                    if (!sach) continue;
+                    soODuLieu++;
+                    if (laHoTenTiengViet(sach)) {
+                        soKhop++;
+                        if (dongDauTien < 0) dongDauTien = r2;
+                    }
+                }
+
+                if (soODuLieu === 0) continue;
+                var tiLe = soKhop / soODuLieu;
+
+                if (soKhop >= 2 && tiLe >= 0.6) {
+                    if (!totNhat || tiLe > totNhat.tiLe || (tiLe === totNhat.tiLe && soKhop > totNhat.soKhop)) {
+                        totNhat = {
+                            cot: c,
+                            soKhop: soKhop,
+                            tongODuLieu: soODuLieu,
+                            tiLe: tiLe,
+                            dongBatDau: dongDauTien >= 0 ? dongDauTien : 0
+                        };
+                    }
+                }
+            }
+
+            return totNhat;
+        }
+
+        function hienThiKhoiXacNhan(ketQuaGoiY) {
+            khoiXacNhan.classList.remove('an');
+
+            chonCotXacNhan.innerHTML = '';
+
+            var soDongQuet = Math.min(duLieuGoc.length, 30);
+            var soCotMax = 0;
+            for (var r = 0; r < soDongQuet; r++) {
+                if (duLieuGoc[r]) soCotMax = Math.max(soCotMax, duLieuGoc[r].length);
+            }
+
+            for (var c = 0; c < soCotMax; c++) {
+                var opt = document.createElement('option');
+                opt.value = c;
+
+                var tenGoiY = '';
+                for (var r2 = 0; r2 < soDongQuet; r2++) {
+                    var dong = duLieuGoc[r2];
+                    if (!dong) continue;
+                    var sach = chuanHoaVanBan(dong[c]);
+                    if (!sach) continue;
+                    if (!laHoTenTiengViet(sach) || tenGoiY === '') {
+                        tenGoiY = sach;
+                        if (!laHoTenTiengViet(sach)) break;
+                    }
+                }
+
+                var nhan = 'Cột ' + tenCotChu(c);
+                if (tenGoiY) nhan += ' — "' + (tenGoiY.length > 40 ? tenGoiY.substring(0, 40) + '…' : tenGoiY) + '"';
+                opt.textContent = nhan;
+                chonCotXacNhan.appendChild(opt);
+            }
+
+            if (ketQuaGoiY) {
+                chonCotXacNhan.value = ketQuaGoiY.cot;
+                chonDongXacNhan.value = ketQuaGoiY.dongBatDau + 1;
+                thongBaoXacNhan.textContent = 'Không tìm thấy ô "Họ và Tên" trong file. Hệ thống gợi ý: cột ' + tenCotChu(ketQuaGoiY.cot) + ', dòng bắt đầu ' + dinhDangSo(ketQuaGoiY.dongBatDau + 1) + '. Vui lòng kiểm tra và bấm "Xác nhận".';
+            } else {
+                chonDongXacNhan.value = 1;
+                thongBaoXacNhan.textContent = 'Không tìm thấy ô "Họ và Tên" và không có cột nào khớp mẫu họ tên. Vui lòng chọn cột và dòng bắt đầu dữ liệu thủ công.';
+            }
+        }
+
+        function sapXepDuLieu() {
+            if (nutSapXep.disabled) return;
+            if (dangXuLy) return;
+            if (!duLieuGoc || duLieuGoc.length < 2) {
+                ghiNhatKy('canh-bao', 'Không có đủ dữ liệu để sắp xếp.');
+                return;
+            }
+            if (viTriCotHoTen < 0) {
+                ghiNhatKy('loi', 'Cột họ tên không hợp lệ. Hãy chọn lại.');
+                return;
+            }
+            if (dongBatDauDuLieu < 0 || dongBatDauDuLieu >= duLieuGoc.length) {
+                ghiNhatKy('loi', 'Dòng bắt đầu dữ liệu không hợp lệ.');
+                return;
+            }
+
+            dangXuLy = true;
+            datTrangThaiNut({ sapXep: false, xuatFile: false, huy: true });
+            hienThiTienTrinh(0, 'Đang quét vùng dữ liệu...');
+
+            setTimeout(function () {
+                try {
+                    var batDau = performance.now();
+
+                    var ketQuaQuet = quetVungDuLieu(duLieuGoc, dongBatDauDuLieu);
+
+                    if (ketQuaQuet.dongKetThuc < dongBatDauDuLieu) {
+                        ghiNhatKy('loi', 'Không tìm thấy dòng dữ liệu hợp lệ nào trong vùng sắp xếp.');
+                        datTrangThaiNut({ sapXep: true, xuatFile: false, huy: false });
+                        dangXuLy = false;
+                        setTimeout(anTienTrinh, 2000);
+                        return;
+                    }
+
+                    var dongKetThuc = ketQuaQuet.dongKetThuc;
+
+                    ghiNhatKy('thong-tin', 'Vùng sắp xếp: dòng ' + (dongBatDauDuLieu + 1) + ' đến dòng ' + (dongKetThuc + 1) + '.');
+                    ghiNhatKy('thong-tin', 'Lý do dừng: ' + ketQuaQuet.lyDoDung + '.');
+
+                    if (ketQuaQuet.soDongTrongBoQua > 0) {
+                        ghiNhatKy('canh-bao', 'Đã bỏ qua ' + dinhDangSo(ketQuaQuet.soDongTrongBoQua) + ' dòng trống xen kẽ trong vùng dữ liệu.');
+                    }
+                    if (ketQuaQuet.soDongSttBatThuong > 0) {
+                        ghiNhatKy('canh-bao', 'Phát hiện ' + dinhDangSo(ketQuaQuet.soDongSttBatThuong) + ' dòng có số thứ tự bất thường.');
+                    }
+
+                    hienThiTienTrinh(20, 'Đang sao chép sheet gốc...');
+
+                    var wsGoc = workbookGoc.Sheets[tenSheetHienTai];
+                    var wsMoi = cloneSheet(wsGoc);
+
+                    var ref = XLSX.utils.decode_range(wsMoi['!ref']);
+                    var soCotToiDa = ref.e.c + 1;
+
+                    if (wsMoi['!merges']) {
+                        for (var mIdx = 0; mIdx < wsMoi['!merges'].length; mIdx++) {
+                            var merge = wsMoi['!merges'][mIdx];
+                            if (merge.s.r >= dongBatDauDuLieu && merge.e.r <= dongKetThuc) {
+                                ghiNhatKy('canh-bao', 'Phát hiện ô gộp tại dòng ' + (merge.s.r + 1) + '-' + (merge.e.r + 1) + ' nằm trong vùng sắp xếp.');
+                            }
+                        }
+                    }
+
+                    var dsCotCongThuc = {};
+                    var soCotCongThuc = 0;
+                    for (var cCheck = 0; cCheck < soCotToiDa; cCheck++) {
+                        if (laCotCongThuc(wsGoc, dongBatDauDuLieu, cCheck)) {
+                            dsCotCongThuc[cCheck] = true;
+                            soCotCongThuc++;
+                        }
+                    }
+                    if (soCotCongThuc > 0) {
+                        var tenCotCT = [];
+                        for (var cKey in dsCotCongThuc) {
+                            tenCotCT.push(tenCotChu(parseInt(cKey, 10)));
+                        }
+                        ghiNhatKy('thong-tin', 'Phát hiện ' + soCotCongThuc + ' cột công thức: ' + tenCotCT.join(', ') + '. Các cột này sẽ được kéo công thức theo dòng, không sắp xếp dữ liệu.');
+                    }
+
+                    hienThiTienTrinh(40, 'Đang đọc các ô trong vùng sắp xếp...');
+
+                    var soDongTrongTen = 0;
+                    var mangSapXep = [];
+
+                    for (var r = dongBatDauDuLieu; r <= dongKetThuc; r++) {
+                        var dongAOA = duLieuGoc[r] || [];
+
+                        var trongHoanToan = true;
+                        for (var cCheck2 = 0; cCheck2 < soCotToiDa; cCheck2++) {
+                            if (chuanHoaVanBan(dongAOA[cCheck2]) !== '') {
+                                trongHoanToan = false;
+                                break;
+                            }
+                        }
+                        if (trongHoanToan) continue;
+
+                        var cells = [];
+                        for (var c2 = 0; c2 < soCotToiDa; c2++) {
+                            if (dsCotCongThuc[c2]) {
+                                cells.push(null);
+                                continue;
+                            }
+                            var addr = XLSX.utils.encode_cell({ c: c2, r: r });
+                            var o = wsMoi[addr];
+                            cells.push(o ? copyO(o) : null);
+                        }
+
+                        var hoTen = chuanHoaVanBan(dongAOA[viTriCotHoTen]);
+                        if (!hoTen) soDongTrongTen++;
+
+                        mangSapXep.push({
+                            cells: cells,
+                            sortKey: taoSortKey(hoTen)
+                        });
+                    }
+
+                    hienThiTienTrinh(60, 'Đang sắp xếp ' + dinhDangSo(mangSapXep.length) + ' dòng...');
+
+                    var collator = new Intl.Collator('vi', { sensitivity: 'variant' });
+                    mangSapXep.sort(function (a, b) {
+                        return collator.compare(a.sortKey, b.sortKey);
+                    });
+
+                    hienThiTienTrinh(80, 'Đang ghi lại vào sheet...');
+
+                    for (var i = 0; i < mangSapXep.length; i++) {
+                        var rowDich = dongBatDauDuLieu + i;
+                        var item = mangSapXep[i];
+
+                        for (var c3 = 0; c3 < soCotToiDa; c3++) {
+                            if (dsCotCongThuc[c3]) continue;
+
+                            var addr2 = XLSX.utils.encode_cell({ c: c3, r: rowDich });
+                            var o2 = item.cells[c3];
+
+                            if (o2) {
+                                if (c3 === viTriCotHoTen && tuyChonCapitalize.checked) {
+                                    var chuMoi = chuanHoaCapitalize(String(o2.v === undefined || o2.v === null ? '' : o2.v));
+                                    o2.v = chuMoi;
+                                    o2.t = 's';
+                                    delete o2.w;
+                                }
+                                wsMoi[addr2] = copyO(o2);
+                            } else {
+                                delete wsMoi[addr2];
+                            }
+                        }
+                    }
+
+                    for (var rXoa = dongBatDauDuLieu + mangSapXep.length; rXoa <= dongKetThuc; rXoa++) {
+                        for (var cXoa = 0; cXoa < soCotToiDa; cXoa++) {
+                            if (dsCotCongThuc[cXoa]) continue;
+                            var addrXoa = XLSX.utils.encode_cell({ c: cXoa, r: rXoa });
+                            delete wsMoi[addrXoa];
+                        }
+                    }
+
+                    if (tuyChonDanhLaiSTT.checked && !dsCotCongThuc[0]) {
+                        for (var j = 0; j < mangSapXep.length; j++) {
+                            var rowSTT = dongBatDauDuLieu + j;
+                            var addrSTT = XLSX.utils.encode_cell({ c: 0, r: rowSTT });
+                            wsMoi[addrSTT] = { v: j + 1, t: 'n' };
+                        }
+                        ghiNhatKy('thong-tin', 'Đã đánh lại cột STT từ 1 đến ' + dinhDangSo(mangSapXep.length) + '.');
+                    }
+
+                    if (soCotCongThuc > 0) {
+                        for (var cKey2 in dsCotCongThuc) {
+                            var cotCT = parseInt(cKey2, 10);
+                            var addrMau = XLSX.utils.encode_cell({ c: cotCT, r: dongBatDauDuLieu });
+                            var oMau = wsMoi[addrMau];
+                            if (!oMau || !oMau.f) continue;
+
+                            var congThucMau = oMau.f;
+                            var oMauV = oMau.v;
+
+                            for (var k = 0; k < mangSapXep.length; k++) {
+                                var rowMoi = dongBatDauDuLieu + k;
+                                var delta = rowMoi - dongBatDauDuLieu;
+                                var congThucMoi = dichCongThuc(congThucMau, delta);
+                                var addr3 = XLSX.utils.encode_cell({ c: cotCT, r: rowMoi });
+                                var vTam = (delta === 0 && oMauV !== undefined) ? oMauV : 0;
+                                wsMoi[addr3] = { v: vTam, t: 'n', f: congThucMoi };
+                            }
+                        }
+                        ghiNhatKy('thong-tin', 'Đã kéo công thức cho ' + soCotCongThuc + ' cột (' + dinhDangSo(mangSapXep.length) + ' dòng mỗi cột).');
+                    }
+
+                    sheetDaSapXep = wsMoi;
+                    duLieuDaSapXep = XLSX.utils.sheet_to_json(wsMoi, { header: 1, defval: '' });
+
+                    var ketThuc = performance.now();
+                    var thoiGian = ((ketThuc - batDau) / 1000).toFixed(2);
+
+                    hienThiTienTrinh(100, 'Hoàn thành!');
+
+                    hienThiBang(duLieuDaSapXep, true);
+
+                    var thongTin = dinhDangSo(mangSapXep.length) + ' dòng đã sắp xếp · Thời gian: ' + thoiGian + ' giây';
+                    if (soDongTrongTen > 0) thongTin += ' · ' + dinhDangSo(soDongTrongTen) + ' dòng trống tên';
+                    if (soCotCongThuc > 0) thongTin += ' · ' + soCotCongThuc + ' cột công thức được kéo theo dòng';
+                    thongTinKetQua.textContent = thongTin;
+
+                    ghiNhatKy('thong-tin', 'Sắp xếp hoàn thành trong ' + thoiGian + ' giây. ' + dinhDangSo(mangSapXep.length) + ' dòng đã xử lý.');
+
+                    if (soDongTrongTen > 0) {
+                        ghiNhatKy('canh-bao', 'Tổng cộng ' + dinhDangSo(soDongTrongTen) + ' dòng có ô họ tên trống (đã đẩy xuống cuối).');
+                    }
+
+                    if (soCotCongThuc > 0) {
+                        ghiNhatKy('canh-bao', 'Cột công thức sẽ được Excel tính lại khi mở file. Bảng xem trước có thể hiển thị 0 ở các cột công thức.');
+                    }
+
+                    datTrangThaiNut({ sapXep: true, xuatFile: true, huy: false });
+                    dangXuLy = false;
+
+                    setTimeout(anTienTrinh, 1000);
+                } catch (err) {
+                    hienThiTienTrinh(0, 'Lỗi: ' + err.message);
+                    ghiNhatKy('loi', 'Lỗi sắp xếp: ' + err.message);
+                    datTrangThaiNut({ sapXep: true, xuatFile: false, huy: false });
+                    dangXuLy = false;
+                    setTimeout(anTienTrinh, 2000);
+                }
+            }, 50);
+        }
+
+        function hienThiBang(duLieu, laKetQua) {
+            if (!duLieu || duLieu.length === 0) {
+                khungBang.innerHTML = '<div class="trang-thai-rong">Chưa có dữ liệu</div>';
+                return;
+            }
+
+            var soCotMax = 0;
+            var gioiHanDong = Math.min(duLieu.length, 30);
+            for (var r = 0; r < gioiHanDong; r++) {
+                if (duLieu[r]) soCotMax = Math.max(soCotMax, duLieu[r].length);
+            }
+            var soCotHienThi = Math.min(soCotMax, 8);
+            var soDongHienThi = Math.min(duLieu.length, 30);
+
+            var html = '<table><thead><tr>';
+            html += '<th>#</th>';
+            for (var i = 0; i < soCotHienThi; i++) {
+                html += '<th>' + escapeHtml(tenCotChu(i)) + '</th>';
+            }
+            html += '</tr></thead><tbody>';
+
+            for (var j = 0; j < soDongHienThi; j++) {
+                var dong = duLieu[j] || [];
+                var lopDong = '';
+
+                if (j === dongTieuDe) {
+                    lopDong = 'dong-tieu-de-bang';
+                }
+
+                if (laKetQua && viTriCotHoTen >= 0) {
+                    var giaTriCot = dong[viTriCotHoTen];
+                    if (chuanHoaVanBan(giaTriCot) === '') {
+                        lopDong = 'dong-trong-ten';
+                    }
+                }
+
+                html += '<tr' + (lopDong ? ' class="' + lopDong + '"' : '') + '>';
+                html += '<td>' + (j + 1) + '</td>';
+
+                for (var k = 0; k < soCotHienThi; k++) {
+                    var giaTri = dong[k];
+                    if (giaTri === null || giaTri === undefined) giaTri = '';
+                    if (typeof giaTri === 'number') {
+                        giaTri = dinhDangSo(giaTri);
+                    } else {
+                        giaTri = escapeHtml(String(giaTri));
+                    }
+                    html += '<td>' + giaTri + '</td>';
+                }
+                html += '</tr>';
+            }
+
+            if (duLieu.length > soDongHienThi) {
+                html += '<tr><td colspan="' + (soCotHienThi + 1) + '" class="dong-thong-bao-khac">... và ' + dinhDangSo(duLieu.length - soDongHienThi) + ' dòng khác</td></tr>';
+            }
+
+            html += '</tbody></table>';
+            khungBang.innerHTML = html;
+        }
+
+        function xuatFile() {
+            if (nutXuatFile.disabled) return;
+            if (dangXuLy) return;
+            if (!sheetDaSapXep) {
+                ghiNhatKy('canh-bao', 'Chưa có dữ liệu đã sắp xếp để xuất. Hãy bấm "Sắp xếp dữ liệu" trước.');
+                return;
+            }
+
+            dangXuLy = true;
+            datTrangThaiNut({ sapXep: false, xuatFile: false, huy: false });
+            hienThiTienTrinh(0, 'Đang tạo file Excel...');
+
+            setTimeout(function () {
+                try {
+                    var tenSheetXuat = (tenSheetHienTai || 'Sheet1') + '_sapxep';
+                    tenSheetXuat = tenSheetXuat.replace(/[\\\/\?\*\[\]:]/g, '_');
+                    if (tenSheetXuat.length > 31) tenSheetXuat = tenSheetXuat.substring(0, 31);
+
+                    var wbMoi = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wbMoi, sheetDaSapXep, tenSheetXuat);
+
+                    var tenGoc = tenFileGoc.replace(/\.[^.]+$/, '');
+                    var ngay = new Date();
+                    var chuoiNgay = ngay.getFullYear() + String(ngay.getMonth() + 1).padStart(2, '0') + String(ngay.getDate()).padStart(2, '0');
+                    var chuoiGio = String(ngay.getHours()).padStart(2, '0') + String(ngay.getMinutes()).padStart(2, '0');
+                    var tenFileXuat = tenGoc + '_sapxep_' + chuoiNgay + '_' + chuoiGio + '.xlsx';
+
+                    hienThiTienTrinh(50, 'Đang ghi file...');
+
+                    var wbout = XLSX.write(wbMoi, { bookType: 'xlsx', type: 'array' });
+                    var blob = new Blob([wbout], { type: 'application/octet-stream' });
+                    var url = URL.createObjectURL(blob);
+
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = tenFileXuat;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    setTimeout(function () {
+                        URL.revokeObjectURL(url);
+                    }, 1000);
+
+                    hienThiTienTrinh(100, 'Đã xuất file!');
+                    ghiNhatKy('thong-tin', 'Đã xuất file: ' + tenFileXuat);
+                    ghiNhatKy('thong-tin', 'Tên sheet trong file xuất: ' + tenSheetXuat);
+
+                    datTrangThaiNut({ sapXep: true, xuatFile: true, huy: false });
+                    dangXuLy = false;
+                    setTimeout(anTienTrinh, 1500);
+                } catch (err) {
+                    hienThiTienTrinh(0, 'Lỗi: ' + err.message);
+                    ghiNhatKy('loi', 'Lỗi xuất file: ' + err.message);
+                    datTrangThaiNut({ sapXep: true, xuatFile: true, huy: false });
+                    dangXuLy = false;
+                    setTimeout(anTienTrinh, 2000);
+                }
+            }, 50);
+        }
+
+        vungTha.addEventListener('click', function () {
+            if (dangXuLy) return;
+            inputFile.click();
+        });
+
+        inputFile.addEventListener('change', function (e) {
+            if (e.target.files && e.target.files.length > 0) {
+                xuLyFile(e.target.files[0]);
+            }
+            inputFile.value = '';
+        });
+
+        vungTha.addEventListener('dragenter', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            demDrag++;
+            vungTha.classList.add('dang-tha');
+        });
+
+        vungTha.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        vungTha.addEventListener('dragleave', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            demDrag--;
+            if (demDrag <= 0) {
+                demDrag = 0;
+                vungTha.classList.remove('dang-tha');
+            }
+        });
+
+        vungTha.addEventListener('drop', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            demDrag = 0;
+            vungTha.classList.remove('dang-tha');
+            if (dangXuLy) return;
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                xuLyFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        document.addEventListener('paste', function (e) {
+            if (dangXuLy) return;
+            var items = e.clipboardData && e.clipboardData.items;
+            if (!items) return;
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].kind === 'file') {
+                    var file = items[i].getAsFile();
+                    if (file) {
+                        xuLyFile(file);
+                        e.preventDefault();
+                        return;
+                    }
+                }
+            }
+        });
+
+        chonSheet.addEventListener('change', function () {
+            if (dangXuLy) return;
+            var tenSheet = chonSheet.value;
+            if (tenSheet) {
+                docSheet(tenSheet);
+            }
+        });
+
+        nutXacNhan.addEventListener('click', function () {
+            var cot = parseInt(chonCotXacNhan.value, 10);
+            var dong = parseInt(chonDongXacNhan.value, 10);
+
+            if (isNaN(cot) || cot < 0) {
+                ghiNhatKy('loi', 'Cột không hợp lệ.');
+                return;
+            }
+            if (isNaN(dong) || dong < 1 || dong > duLieuGoc.length) {
+                ghiNhatKy('loi', 'Dòng bắt đầu không hợp lệ (phải từ 1 đến ' + duLieuGoc.length + ').');
+                return;
+            }
+
+            viTriCotHoTen = cot;
+            dongBatDauDuLieu = dong - 1;
+            dongTieuDe = dongBatDauDuLieu - 1;
+            if (dongTieuDe < 0) dongTieuDe = 0;
+
+            tieuDeCot = (duLieuGoc[dongTieuDe] || []).map(function (o) {
+                return chuanHoaVanBan(o);
+            });
+
+            khoiXacNhan.classList.add('an');
+            datTrangThaiNut({ sapXep: true, xuatFile: false, huy: false });
+
+            ghiNhatKy('thong-tin', 'Đã xác nhận: cột ' + tenCotChu(viTriCotHoTen) + ', dòng bắt đầu dữ liệu: ' + dinhDangSo(dong));
+
+            hienThiBang(duLieuGoc, false);
+            thongTinKetQua.textContent = dinhDangSo(duLieuGoc.length) + ' dòng · ' + dinhDangSo(tieuDeCot.length) + ' cột · Sheet: ' + tenSheetHienTai;
+        });
+
+        nutSapXep.addEventListener('click', sapXepDuLieu);
+        nutXuatFile.addEventListener('click', xuatFile);
+
+        nutHuy.addEventListener('click', function () {
+            dangXuLy = false;
+            anTienTrinh();
+            datTrangThaiNut({ sapXep: true, xuatFile: !!sheetDaSapXep, huy: false });
+            ghiNhatKy('canh-bao', 'Đã hủy thao tác.');
+        });
+
+        datTrangThaiNut({ sapXep: false, xuatFile: false, huy: false });
+
+        napThuVien().then(function (nguon) {
+            ghiNhatKy('thong-tin', 'Đã nạp thư viện SheetJS từ: ' + nguon);
+        }).catch(function (err) {
+            ghiNhatKy('loi', err.message);
+            trangThaiFile.className = 'trang-thai-file loi';
+            trangThaiFile.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b83232" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg><span>Không thể nạp thư viện SheetJS. Vui lòng kiểm tra kết nối mạng.</span>';
+        });
+
+    })();
+    </script>
+
+</body>
+</html>
